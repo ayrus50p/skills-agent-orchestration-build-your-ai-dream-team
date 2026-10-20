@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A clear overview of current projects and their recent activity.">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard__header">
+        <h1>Project Pulse</h1>
+        <p>A snapshot of project ownership, status, and recent activity.</p>
+      </header>
+
+      <p id="project-status" class="status-message" role="status" aria-live="polite" aria-atomic="true">
+        Loading projects…
+      </p>
+      <ul id="project-list" class="project-list" aria-label="Projects"></ul>
+    </main>
+
+    <script>
+      const statusMessage = document.getElementById("project-status");
+      const projectList = document.getElementById("project-list");
+      const requiredFields = ["name", "owner", "status", "recentActivity", "priority", "summary"];
+
+      function showStatus(message, modifier) {
+        statusMessage.className = "status-message";
+        if (modifier) statusMessage.classList.add(`status-message--${modifier}`);
+        statusMessage.textContent = message;
+        statusMessage.hidden = false;
+        statusMessage.setAttribute("role", modifier === "error" ? "alert" : "status");
+        statusMessage.setAttribute("aria-live", modifier === "error" ? "assertive" : "polite");
+      }
+
+      function makeDetail(label, value) {
+        const wrapper = document.createElement("div");
+        const term = document.createElement("dt");
+        const description = document.createElement("dd");
+        term.textContent = label;
+        description.textContent = value;
+        wrapper.append(term, description);
+        return wrapper;
+      }
+
+      function renderProject(project) {
+        const card = document.createElement("li");
+        card.className = "project-card";
+
+        const header = document.createElement("header");
+        header.className = "project-card__header";
+        const name = document.createElement("h2");
+        name.textContent = project.name;
+        header.append(name);
+
+        const meta = document.createElement("dl");
+        meta.className = "project-card__meta";
+        meta.append(
+          makeDetail("Owner", project.owner),
+          makeDetail("Status", project.status),
+          makeDetail("Priority", project.priority)
+        );
+
+        const activity = document.createElement("p");
+        activity.className = "project-card__activity";
+        const activityLabel = document.createElement("strong");
+        activityLabel.textContent = "Recent activity: ";
+        activity.append(activityLabel, document.createTextNode(project.recentActivity));
+
+        const summary = document.createElement("p");
+        summary.className = "project-card__summary";
+        summary.textContent = project.summary;
+
+        card.append(header, meta, activity, summary);
+        return card;
+      }
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("project-data.json");
+          if (!response.ok) throw new Error(`Project data request failed (${response.status}).`);
+          const data = await response.json();
+          if (!data || !Array.isArray(data.projects)) {
+            throw new Error("Project data must contain a projects array.");
+          }
+
+          if (data.projects.some((project) =>
+            !project || requiredFields.some((field) =>
+              typeof project[field] !== "string" || !project[field].trim()
+            )
+          )) {
+            throw new Error("One or more projects are missing required information.");
+          }
+
+          if (data.projects.length === 0) {
+            showStatus("No projects to display yet.", "empty");
+            return;
+          }
+
+          const cards = data.projects.map(renderProject);
+          projectList.replaceChildren(...cards);
+          statusMessage.hidden = true;
+          statusMessage.textContent = "";
+        } catch (error) {
+          showStatus(
+            `Unable to load projects. ${error instanceof Error ? error.message : "Please try again later."}`,
+            "error"
+          );
+        }
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>

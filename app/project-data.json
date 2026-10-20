@@ -1,0 +1,28 @@
+{
+  "projects": [
+    {
+      "name": "Northstar",
+      "owner": "Mona Patel",
+      "status": "In progress",
+      "recentActivity": "Completed the first round of onboarding interviews.",
+      "priority": "High",
+      "summary": "Simplify the first-run experience for new contributors."
+    },
+    {
+      "name": "Atlas",
+      "owner": "Jordan Lee",
+      "status": "Planning",
+      "recentActivity": "Drafted the initial roadmap for the next release.",
+      "priority": "Medium",
+      "summary": "Bring project documentation and delivery milestones into one clear view."
+    },
+    {
+      "name": "Beacon",
+      "owner": "Sam Rivera",
+      "status": "On track",
+      "recentActivity": "Shared the latest accessibility review findings.",
+      "priority": "Low",
+      "summary": "Improve visibility into team updates and emerging project risks."
+    }
+  ]
+}
